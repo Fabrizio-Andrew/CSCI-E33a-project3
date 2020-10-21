@@ -38,8 +38,10 @@ function load_mailbox(mailbox) {
     console.log(emails);
     const body = document.createElement('p');
     emails.forEach(function(email) { 
-      var li = document.createElement('li').innerHTML = `${email.subject} ${email.sender} ${email.timestamp}`;
-      document.querySelector('#emails-view').append(li);
+      var div = document.createElement('div')
+      div.innerHTML = `${email.subject} ${email.sender} ${email.timestamp}`;
+      div.id = 'email'
+      document.querySelector('#emails-view').append(div);
     });
     
 
