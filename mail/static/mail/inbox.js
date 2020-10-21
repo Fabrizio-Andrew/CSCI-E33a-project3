@@ -39,24 +39,13 @@ function load_mailbox(mailbox) {
     const body = document.createElement('p');
     emails.forEach(function(email) { 
       var div = document.createElement('div')
-      div.innerHTML = `${email.subject} ${email.sender} ${email.timestamp}`;
-      div.id = 'email'
+      div.innerHTML = `${email.subject} -- ${email.sender} -- ${email.timestamp}`;
+      div.id = 'email';
+      if (email.read === true) {
+        div.style = 'background-color: gray';
+      }
       document.querySelector('#emails-view').append(div);
     });
-    
-
-
-
-    // ... do something else with emails ...
   });
 }
 
-
-  // GET emails for mailbox -- do something more with this
-//  var response = fetch(emails/`mailbox`);
-// console.log(response)
-//  emails = response.json();
-//  function (emails) {
-//    document.querySelector('#emails-view').innerHTML = `yummy! emails! ${emails}`;
-//    console.log(`Here! ${emails}`);
-//  };
