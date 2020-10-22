@@ -20,6 +20,25 @@ function compose_email() {
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
+
+  // Send email when form is submitted
+  document.querySelector('#compose-form').onsubmit = function() {
+    fetch('/emails', {
+      method: 'POST',
+      body: JSON.stringify({
+          recipients: document.querySelector('#compose-recipients').value,
+          subject: document.querySelector('#compose-subject').value,
+          body: document.querySelector('#compose-body').value
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Print result
+        console.log(result);
+
+    load_mailbox('sent');
+    });
+  }
 }
 
 function load_mailbox(mailbox) {
@@ -48,4 +67,3 @@ function load_mailbox(mailbox) {
     });
   });
 }
-
