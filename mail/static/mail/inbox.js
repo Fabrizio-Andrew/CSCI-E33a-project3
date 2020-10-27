@@ -55,11 +55,7 @@ function load_mailbox(mailbox) {
   // Fetch emails for mailbox from API
   fetch(`/emails/${mailbox}`)
   .then(response => response.json())
-
-  // This looks unnecessary...!!!!!!!!!!!!!!!!!!!!!!
   .then(emails => {
-    const body = document.createElement('p');
-
     // Create div with info for each email in response
     emails.forEach(function(email) { 
       var div = document.createElement('div');
