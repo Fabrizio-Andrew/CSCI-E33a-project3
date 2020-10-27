@@ -15,6 +15,7 @@ function compose_email() {
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#read-view').style.display = 'none';
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
@@ -46,24 +47,47 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#read-view').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
+  // Fetch emails for mailbox from API
   fetch(`/emails/${mailbox}`)
   .then(response => response.json())
+
+  // This looks unnecessary...!!!!!!!!!!!!!!!!!!!!!!
   .then(emails => {
-    // Print emails
-    console.log(emails);
     const body = document.createElement('p');
+
+    // Create div with info for each email in response
     emails.forEach(function(email) { 
-      var div = document.createElement('div')
-      div.innerHTML = `${email.subject} -- ${email.sender} -- ${email.timestamp}`;
-      div.id = 'email';
+      var div = document.createElement('div');
+      var email_line = document.createElement('a');
+      email_line.class = 'email-line';
+      email_line.href = '';
+      email_line.innerHTML = `${email.subject} -- ${email.sender} -- ${email.timestamp}`;
+      div.append(email_line);
       if (email.read === true) {
         div.style = 'background-color: gray';
       }
+      email_line.addEventListener('click', () => read_email(`${email.id}`))
       document.querySelector('#emails-view').append(div);
     });
+  });
+}
+
+function read_email(email) {
+
+  // Show the "read" view and hide other views
+  document.querySelector('#emails-view').style.display = 'block';
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#read-view').style.display = 'none';
+
+  // Fetch email from API
+  fetch(`/emails/${email}`)
+  .then(response => response.json())
+  .then(email => {
+    console.log(email);
   });
 }
