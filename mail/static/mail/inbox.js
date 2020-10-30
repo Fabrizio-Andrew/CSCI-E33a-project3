@@ -76,14 +76,21 @@ function load_mailbox(mailbox) {
 function read_email(email) {
 
   // Show the "read" view and hide other views
-  document.querySelector('#emails-view').style.display = 'block';
+  document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
-  document.querySelector('#read-view').style.display = 'none';
+  document.querySelector('#read-view').style.display = 'block';
 
   // Fetch email from API
   fetch(`/emails/${email}`)
   .then(response => response.json())
   .then(email => {
+    // Display email info in appropriate divs
+    // THIS IS STILL REDIRECTING TO INBOX!!!
     console.log(email);
+    const div = document.createElement('div');
+    div.innerHTML = `${email.subject} -- ${email.sender} -- ${email.timestamp}`;
+    const body = document.createElement('div');
+    body.innerHtml = `${email.body}`
+    document.querySelector('#read-view').append(div, body)
   });
 }
