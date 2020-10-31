@@ -59,6 +59,7 @@ function load_mailbox(mailbox) {
   fetch(`/emails/${mailbox}`)
   .then(response => response.json())
   .then(emails => {
+
     // Create div with info for each email in response
     emails.forEach(function(email) { 
       var div = document.createElement('div');
@@ -68,58 +69,50 @@ function load_mailbox(mailbox) {
       email_line.innerHTML = `${email.subject} -- ${email.sender} -- ${email.timestamp}`;
       div.append(email_line);
       if (email.read === true) {
-        div.style = 'background-color: gray';
+        div.style = 'background-color: lightgray';
       }
-
-      // When the email link is clicked...
-      email_line.onclick = function() {
-
-        // Show the "read" view and hide other views
-        document.querySelector('#emails-view').style.display = 'none';
-        document.querySelector('#compose-view').style.display = 'none';
-        document.querySelector('#read-view').style.display = 'block';
-
-        // Fetch email from API
-        fetch(`/emails/${email.id}`)
-        .then(response => response.json())
-        .then(email => {
-
-          // Display email info in appropriate divs
-          console.log(email);
-          const div = document.createElement('div');
-          div.innerHTML = `${email.subject} -- ${email.sender} -- ${email.timestamp}`;
-          const body = document.createElement('div');
-          body.innerHtml = `${email.body}`
-          document.querySelector('#read-view').append(div, body)
-        });
-
-        // Prevent the default redirect to the inbox
-        return false;
-      }
+      // Open Email when the corresponding hyperlink is clicked
+      email_line.onclick = () => read_email(email.id);
+      
       document.querySelector('#emails-view').append(div);
     });
   });
 }
 
-//function read_email(email) {
+function read_email(email_id) {
 
   // Show the "read" view and hide other views
-//  document.querySelector('#emails-view').style.display = 'none';
-// document.querySelector('#compose-view').style.display = 'none';
-//  document.querySelector('#read-view').style.display = 'block';
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#read-view').style.display = 'block';
 
   // Fetch email from API
-//  fetch(`/emails/${email}`)
-//  .then(response => response.json())
-//  .then(email => {
+  fetch(`/emails/${email_id}`)
+  .then(response => response.json())
+  .then(email => {
+
     // Display email info in appropriate divs
-    // THIS IS STILL REDIRECTING TO INBOX!!!
-//    console.log(email);
-//    const div = document.createElement('div');
-//    div.innerHTML = `${email.subject} -- ${email.sender} -- ${email.timestamp}`;
-//    const body = document.createElement('div');
-//    body.innerHtml = `${email.body}`
-//    document.querySelector('#read-view').append(div, body)
-//  });
-//  return false;
-//}
+    console.log(email);
+
+    // Clear out anything in the read view
+    document.querySelector('#read-view').innerHTML = '';
+
+    // Display email info in appropriate divs
+    var email_container = document.createElement('div');
+    email_container.innerHTML = `<h3>Subject: ${email.subject}
+                                <h4>From: ${email.sender}</h4 
+                                <p>${email.timestamp}</p>
+                                <h4>Message:</h4>
+                                <p>${email.body}</p>`;
+    document.querySelector('#read-view').append(email_container);
+  });
+
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        read: true
+    })
+  })
+  // Prevent the default redirect to the inbox
+  return false;
+}
