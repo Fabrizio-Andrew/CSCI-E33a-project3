@@ -34,11 +34,14 @@ function compose_email() {
     })
     .then(response => response.json())
     .then(result => {
-        // Print result
-        console.log(result);
+      // Print result
+      console.log(result);
 
-    load_mailbox('sent');
+      load_mailbox('sent');
     });
+
+    // Prevent the default redirect to the inbox
+    return false;
   }
 }
 
@@ -67,30 +70,56 @@ function load_mailbox(mailbox) {
       if (email.read === true) {
         div.style = 'background-color: gray';
       }
-      email_line.addEventListener('click', () => read_email(`${email.id}`))
+
+      // When the email link is clicked...
+      email_line.onclick = function() {
+
+        // Show the "read" view and hide other views
+        document.querySelector('#emails-view').style.display = 'none';
+        document.querySelector('#compose-view').style.display = 'none';
+        document.querySelector('#read-view').style.display = 'block';
+
+        // Fetch email from API
+        fetch(`/emails/${email.id}`)
+        .then(response => response.json())
+        .then(email => {
+
+          // Display email info in appropriate divs
+          console.log(email);
+          const div = document.createElement('div');
+          div.innerHTML = `${email.subject} -- ${email.sender} -- ${email.timestamp}`;
+          const body = document.createElement('div');
+          body.innerHtml = `${email.body}`
+          document.querySelector('#read-view').append(div, body)
+        });
+
+        // Prevent the default redirect to the inbox
+        return false;
+      }
       document.querySelector('#emails-view').append(div);
     });
   });
 }
 
-function read_email(email) {
+//function read_email(email) {
 
   // Show the "read" view and hide other views
-  document.querySelector('#emails-view').style.display = 'none';
-  document.querySelector('#compose-view').style.display = 'none';
-  document.querySelector('#read-view').style.display = 'block';
+//  document.querySelector('#emails-view').style.display = 'none';
+// document.querySelector('#compose-view').style.display = 'none';
+//  document.querySelector('#read-view').style.display = 'block';
 
   // Fetch email from API
-  fetch(`/emails/${email}`)
-  .then(response => response.json())
-  .then(email => {
+//  fetch(`/emails/${email}`)
+//  .then(response => response.json())
+//  .then(email => {
     // Display email info in appropriate divs
     // THIS IS STILL REDIRECTING TO INBOX!!!
-    console.log(email);
-    const div = document.createElement('div');
-    div.innerHTML = `${email.subject} -- ${email.sender} -- ${email.timestamp}`;
-    const body = document.createElement('div');
-    body.innerHtml = `${email.body}`
-    document.querySelector('#read-view').append(div, body)
-  });
-}
+//    console.log(email);
+//    const div = document.createElement('div');
+//    div.innerHTML = `${email.subject} -- ${email.sender} -- ${email.timestamp}`;
+//    const body = document.createElement('div');
+//    body.innerHtml = `${email.body}`
+//    document.querySelector('#read-view').append(div, body)
+//  });
+//  return false;
+//}
