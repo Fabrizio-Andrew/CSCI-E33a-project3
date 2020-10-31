@@ -72,14 +72,17 @@ function load_mailbox(mailbox) {
         div.style = 'background-color: lightgray';
       }
       // Open Email when the corresponding hyperlink is clicked
-      email_line.onclick = () => read_email(email.id);
+      email_line.onclick = () => read_email(email.id, mailbox);
       
       document.querySelector('#emails-view').append(div);
     });
   });
 }
 
-function read_email(email_id) {
+function read_email(email_id, mailbox) {
+
+  // Clear out anything in the read view
+  document.querySelector('#read-view').innerHTML = '';
 
   // Show the "read" view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
@@ -90,12 +93,37 @@ function read_email(email_id) {
   fetch(`/emails/${email_id}`)
   .then(response => response.json())
   .then(email => {
-
-    // Display email info in appropriate divs
     console.log(email);
 
-    // Clear out anything in the read view
-    document.querySelector('#read-view').innerHTML = '';
+    // Archive/Unarchive button
+    if (mailbox !== 'sent') {
+      const arch_button = document.createElement('button');
+      arch_button.className = 'btn btn-primary';
+      if (email.archived === true) {
+        arch_button.innerHTML = 'Unarchive';
+        arch_button.onclick = function () {
+          fetch(`/emails/${email.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              archived: false
+            })
+          })
+          .then(() => load_mailbox('inbox'));
+        };
+      } else {
+        arch_button.innerHTML = 'Archive'
+        arch_button.onclick = function () {
+          fetch(`/emails/${email.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              archived: true
+            })
+          })
+          .then(() => load_mailbox('inbox'));
+        };
+      }
+      document.querySelector('#read-view').append(arch_button);
+    };
 
     // Display email info in appropriate divs
     var email_container = document.createElement('div');
@@ -112,7 +140,7 @@ function read_email(email_id) {
     body: JSON.stringify({
         read: true
     })
-  })
+  });
   // Prevent the default redirect to the inbox
   return false;
 }
