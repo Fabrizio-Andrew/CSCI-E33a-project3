@@ -46,9 +46,6 @@ function compose_email(original) {
     })
     .then(response => response.json())
     .then(result => {
-      // Print result
-      console.log(result);
-
       load_mailbox('sent');
     });
 
@@ -105,7 +102,6 @@ function read_email(email_id, mailbox) {
   fetch(`/emails/${email_id}`)
   .then(response => response.json())
   .then(email => {
-    console.log(email);
 
     // Reply button
     const reply_button = document.createElement('button');
