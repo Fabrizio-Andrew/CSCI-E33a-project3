@@ -2,10 +2,20 @@ textarea {
     min-height: 400px;
 }
 
-#email {
+.email {
     border: 1px solid black;
     height: 25px;
     width: 80%;
     margin-bottom: 5px;
     padding-left: 10px;
+}
+
+#arch_button {
+    margin-left: 10px;
+}
+
+#email_container {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid gray;
 }

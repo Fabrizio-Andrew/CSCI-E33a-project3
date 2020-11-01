@@ -22,17 +22,21 @@ function compose_email(original) {
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
 
-  // Write the reply's subject line
-  if (original.subject.startsWith('Re:') === false) {
-    subjectline = 'Re: ' + original.subject
-  } else {
-    subjectline = original.subject
-  }
+  // Check if an original email's subject line exists (and, by extension, if an email was passed into function - indicating this is a reply)
+  if (typeof original.subject === 'string') {
 
-  // Propogate reply info into compose form
-  document.querySelector('#compose-recipients').value = original.sender;
-  document.querySelector('#compose-subject').value = subjectline;
-  document.querySelector('#compose-body').value = `\r\n \r\n --Message sent on ${original.timestamp}-- \r\n ${original.body}`;
+    // Write the reply's subject line
+    if (original.subject.startsWith('Re:') === false) {
+      subjectline = 'Re: ' + original.subject;
+    } else {
+      subjectline = original.subject;
+    }
+
+    // Prefill reply info in compose form
+    document.querySelector('#compose-recipients').value = original.sender;
+    document.querySelector('#compose-subject').value = subjectline;
+    document.querySelector('#compose-body').value = `\r\n \r\n --On ${original.timestamp}, ${original.sender} wrote: -- \r\n ${original.body}`;
+  }
 
   // Send email when form is submitted
   document.querySelector('#compose-form').onsubmit = function() {
@@ -44,15 +48,21 @@ function compose_email(original) {
           body: document.querySelector('#compose-body').value
       })
     })
+    // Load the "sent" mailbox
     .then(response => response.json())
     .then(result => {
+      // Print result
+      console.log(result);
+      
+      // Load Sent mailbox
       load_mailbox('sent');
     });
 
     // Prevent the default redirect to the inbox
     return false;
-  }
+  };
 }
+
 
 function load_mailbox(mailbox) {
 
@@ -69,7 +79,7 @@ function load_mailbox(mailbox) {
   .then(response => response.json())
   .then(emails => {
 
-    // Create div with info for each email in response
+    // Create div with info/hyperlink for each email in response
     emails.forEach(function(email) { 
       var div = document.createElement('div');
       var email_line = document.createElement('a');
@@ -77,6 +87,7 @@ function load_mailbox(mailbox) {
       email_line.href = '';
       email_line.innerHTML = `${email.subject} -- ${email.sender} -- ${email.timestamp}`;
       div.append(email_line);
+      div.className = 'email';
       if (email.read === true) {
         div.style = 'background-color: lightgray';
       }
@@ -114,6 +125,7 @@ function read_email(email_id, mailbox) {
     if (mailbox !== 'sent') {
       const arch_button = document.createElement('button');
       arch_button.className = 'btn btn-primary';
+      arch_button.id = 'arch_button';
       if (email.archived === true) {
         arch_button.innerHTML = 'Unarchive';
         arch_button.onclick = function () {
@@ -142,14 +154,17 @@ function read_email(email_id, mailbox) {
 
     // Display email info in appropriate divs
     var email_container = document.createElement('div');
-    email_container.innerHTML = `<h3>Subject: ${email.subject}
-                                <h4>From: ${email.sender}</h4 
+    email_container.id = 'email_container';
+    email_container.innerHTML = `<h3>Subject: ${email.subject}</h3>
+                                <h4>From: ${email.sender}</h4>
+                                <h4>To: ${email.recipients}</h4>
                                 <p>${email.timestamp}</p>
                                 <h4>Message:</h4>
                                 <p>${email.body}</p>`;
     document.querySelector('#read-view').append(email_container);
   });
 
+  // Mark the email as "read"
   fetch(`/emails/${email_id}`, {
     method: 'PUT',
     body: JSON.stringify({
