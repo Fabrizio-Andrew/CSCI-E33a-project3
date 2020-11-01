@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox('inbox');
 });
 
-function compose_email() {
+function compose_email(original) {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
@@ -21,6 +21,18 @@ function compose_email() {
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
+
+  // Write the reply's subject line
+  if (original.subject.startsWith('Re:') === false) {
+    subjectline = 'Re: ' + original.subject
+  } else {
+    subjectline = original.subject
+  }
+
+  // Propogate reply info into compose form
+  document.querySelector('#compose-recipients').value = original.sender;
+  document.querySelector('#compose-subject').value = subjectline;
+  document.querySelector('#compose-body').value = `\r\n \r\n --Message sent on ${original.timestamp}-- \r\n ${original.body}`;
 
   // Send email when form is submitted
   document.querySelector('#compose-form').onsubmit = function() {
@@ -94,6 +106,13 @@ function read_email(email_id, mailbox) {
   .then(response => response.json())
   .then(email => {
     console.log(email);
+
+    // Reply button
+    const reply_button = document.createElement('button');
+    reply_button.className = 'btn btn-primary';
+    reply_button.innerHTML = 'Reply'
+    reply_button.onclick = () => compose_email(email);
+    document.querySelector('#read-view').append(reply_button);
 
     // Archive/Unarchive button
     if (mailbox !== 'sent') {
